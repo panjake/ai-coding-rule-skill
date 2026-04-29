@@ -1,5 +1,39 @@
 # Project Rules Quickstart
 
+## Fastest Path
+
+Install the Codex skill:
+
+```text
+$skill-installer install https://github.com/panjake/ai-coding-rule-skill/tree/main/skills/codex/karpathy-guidelines
+```
+
+Initialize one project with common rules plus one developer profile:
+
+```bash
+./scripts/init-project.sh /path/to/project jake
+```
+
+These are the two main commands.
+After skill installation, restart Codex to load the new skill.
+
+`init-project.sh` only adds governance and memory files.
+It does not rewrite application structure, move source code, or modify business logic.
+
+It creates:
+
+```text
+AGENTS.md
+.agents/common/rules.md
+.agents/common/context.md
+.agents/developers/{developer}/AGENTS.md
+.agents/developers/{developer}/progress.md
+.agents/developers/{developer}/bugs.md
+.agents/developers/{developer}/sessions/
+.agents/developers/{developer}/decisions/
+.agents/developers/{developer}/templates/
+```
+
 This repository's `karpathy` layer is based on the original source:
 
 - [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)
@@ -14,13 +48,13 @@ Use Codex `skill-installer` to install the skill from this repository path:
 https://github.com/panjake/ai-coding-rule-skill/tree/main/skills/codex/karpathy-guidelines
 ```
 
-Example:
+Command:
 
 ```text
 $skill-installer install https://github.com/panjake/ai-coding-rule-skill/tree/main/skills/codex/karpathy-guidelines
 ```
 
-## Apply As Shared Project Rules
+## Optional: Apply Shared Project Rules Separately
 
 Use [`scripts/apply-karpathy.sh`](../../scripts/apply-karpathy.sh) with an explicit project path:
 

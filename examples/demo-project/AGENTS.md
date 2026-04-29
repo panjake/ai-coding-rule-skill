@@ -48,6 +48,9 @@ If the user does not specify a developer name, ask which developer profile to us
 
 For this repository, `jake` is one developer profile, but it is not the default for everyone.
 
+If `.agents/common/context.md` does not exist, or exists but is still too thin to guide code reading, initialize or extend the project map before making larger changes. This is one of the highest-value shared assets for future model work.
+Keep the project map short, navigation-first, and execution-oriented. Do not turn it into a long encyclopedia.
+
 ## Developer Identity Guard
 
 Developer identity must be explicit.
@@ -123,6 +126,13 @@ Use `.agents/common/context.md` as the project map. It should tell you:
 - key business areas
 - important documents and code entry points
 
+It should also help answer:
+
+- where to start reading
+- which module owns the behavior
+- which shared base class / middleware / helper silently controls the flow
+- what is still uncertain
+
 Use code as the source of truth. If `.agents` memory conflicts with code, trust code and record the mismatch in the selected developer's `bugs.md` or `sessions/`.
 
 ## Start Work Safely
@@ -131,6 +141,7 @@ The common rules in `.agents/common/rules.md` are mandatory.
 
 High-level defaults:
 
+- Communicate in Chinese by default.
 - Keep changes minimal by default.
 - For non-simple tasks, read relevant code before editing.
 - For non-trivial work, follow this order: design first, ask for confirmation second, code only after confirmation.
@@ -238,3 +249,8 @@ Apply these guidelines for code changes unless the user explicitly asks otherwis
 - Keep changes surgical. Touch only the lines needed for the task, match existing style, and do not refactor unrelated code.
 - Define success in a verifiable way. For bug fixes and behavior changes, prefer a reproducible check or test before claiming completion.
 - If a simpler approach exists, say so. If something is unclear, stop and surface the confusion instead of guessing.
+
+Use this section together with:
+
+- `.agents/common/rules.md` for shared hard constraints
+- `.agents/common/context.md` for the project map

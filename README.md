@@ -4,6 +4,44 @@ Reusable AI coding rules, installable Codex skills, and execution-first helper s
 
 可复用的 AI 编码规则仓库，目标不是“收集提示词”，而是把模型更容易执行的规则、脚本和工作流固定下来。
 
+Chinese overview:
+
+- [README.zh-CN.md](README.zh-CN.md)
+
+## Install First
+
+If you only want the shortest path, keep these two commands:
+
+Install the Codex skill:
+
+```text
+$skill-installer install https://github.com/panjake/ai-coding-rule-skill/tree/main/skills/codex/karpathy-guidelines
+```
+
+Initialize one project with common rules plus one developer profile:
+
+```bash
+./scripts/init-project.sh /absolute/path/to/project jake
+```
+
+After skill installation, restart Codex to load the new skill.
+
+`init-project.sh` creates only governance and memory files. It does not rewrite your application structure, move source files, or modify business code.
+
+It creates:
+
+```text
+AGENTS.md
+.agents/common/rules.md
+.agents/common/context.md
+.agents/developers/jake/AGENTS.md
+.agents/developers/jake/progress.md
+.agents/developers/jake/bugs.md
+.agents/developers/jake/sessions/
+.agents/developers/jake/decisions/
+.agents/developers/jake/templates/
+```
+
 ## What This Repo Is
 
 Use this repository when you want:
@@ -96,7 +134,7 @@ Use Codex `skill-installer` to install the skill from this repository path:
 https://github.com/panjake/ai-coding-rule-skill/tree/main/skills/codex/karpathy-guidelines
 ```
 
-Example:
+Command:
 
 ```text
 $skill-installer install https://github.com/panjake/ai-coding-rule-skill/tree/main/skills/codex/karpathy-guidelines
@@ -104,44 +142,9 @@ $skill-installer install https://github.com/panjake/ai-coding-rule-skill/tree/ma
 
 After installation, restart Codex to load the new skill.
 
-### 2. Inject shared rules into a project
+### 2. Initialize a project in one command
 
-```bash
-./scripts/apply-karpathy.sh /absolute/path/to/project
-./scripts/apply-karpathy.sh /absolute/path/to/project jake
-```
-
-Or use the unified entrypoint:
-
-```bash
-./scripts/apply-skill.sh karpathy /absolute/path/to/project
-./scripts/apply-skill.sh karpathy /absolute/path/to/project jake
-```
-
-### 3. Inject project-map context into a project
-
-```bash
-./scripts/apply-context.sh /absolute/path/to/project
-```
-
-Or through the unified entrypoint:
-
-```bash
-./scripts/apply-skill.sh context /absolute/path/to/project
-./scripts/apply-skill.sh all /absolute/path/to/project
-```
-
-### 4. Initialize one developer profile
-
-```bash
-./scripts/bootstrap-developer.sh /absolute/path/to/project jake
-```
-
-Developer profiles are stored under `.agents/developers/{developer}/`.
-Allowed profile characters are lowercase letters, digits, and hyphens.
-Reserved names such as `common`, `templates`, `proposals`, `developers`, `system`, and `shared` are rejected.
-
-### 5. Initialize a project in one command
+Use `init-project.sh` when you want the normal daily setup:
 
 ```bash
 ./scripts/init-project.sh /absolute/path/to/project jake
@@ -152,6 +155,42 @@ The second form means:
 
 - initialize the developer scaffold for `alice`
 - render project-level governance examples with `jake` as the project manager
+
+The script only adds governance files under the project root and `.agents/`.
+It does not change application directories, dependencies, framework config, or business code.
+
+It creates:
+
+```text
+AGENTS.md
+.agents/common/rules.md
+.agents/common/context.md
+.agents/developers/{developer}/AGENTS.md
+.agents/developers/{developer}/progress.md
+.agents/developers/{developer}/bugs.md
+.agents/developers/{developer}/sessions/
+.agents/developers/{developer}/decisions/
+.agents/developers/{developer}/templates/
+```
+
+### 3. Optional: install or inject pieces separately
+
+Use these only when you do not want the full daily setup.
+
+```bash
+./scripts/apply-karpathy.sh /absolute/path/to/project
+./scripts/apply-karpathy.sh /absolute/path/to/project jake
+./scripts/apply-skill.sh karpathy /absolute/path/to/project
+./scripts/apply-skill.sh karpathy /absolute/path/to/project jake
+./scripts/apply-context.sh /absolute/path/to/project
+./scripts/apply-skill.sh context /absolute/path/to/project
+./scripts/apply-skill.sh all /absolute/path/to/project
+./scripts/bootstrap-developer.sh /absolute/path/to/project jake
+```
+
+Developer profiles are stored under `.agents/developers/{developer}/`.
+Allowed profile characters are lowercase letters, digits, and hyphens.
+Reserved names such as `common`, `templates`, `proposals`, `developers`, `system`, and `shared` are rejected.
 
 ### 6. Expected onboarding response
 
