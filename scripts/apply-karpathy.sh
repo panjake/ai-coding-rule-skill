@@ -10,19 +10,19 @@ RULES_SNIPPET="$SNIPPET_DIR/rules-snippet.md"
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") <project-path>
+Usage: $(basename "$0") <project-path> [manager-profile]
 
 Inject Karpathy guidelines into an existing project.
 
 Behavior:
-  - Modifies <project-path>/AGENTS.md if it exists and does not already contain
-    the Karpathy project snippet.
-  - Modifies <project-path>/.agents/common/rules.md if it exists and does not
-    already contain the Karpathy common-rules snippet.
-  - Does not create missing governance files.
+  - Creates or updates <project-path>/AGENTS.md.
+  - Creates or updates <project-path>/.agents/common/rules.md.
+  - Preserves existing file content by appending/prepending the shared snippets
+    when the target files already exist.
 
 Examples:
   $(basename "$0") /path/to/project
+  $(basename "$0") /path/to/project jake
 EOF
 }
 
@@ -31,8 +31,24 @@ fail() {
   exit 1
 }
 
+render_template() {
+  template=$1
+  output=$2
+  manager_profile=$3
+
+  sed "s/__PROJECT_MANAGER__/$manager_profile/g" "$template" > "$output"
+}
+
 append_agents_snippet() {
   target=$1
+  snippet=$2
+
+  if [ ! -f "$target" ]; then
+    cat "$snippet" > "$target"
+    printf '\n' >> "$target"
+    printf 'updated: %s\n' "$target"
+    return
+  fi
 
   if grep -Fq "## Karpathy-Style Coding Guidelines" "$target"; then
     printf 'skip: %s already has project-level Karpathy guidelines\n' "$target"
@@ -40,24 +56,34 @@ append_agents_snippet() {
   fi
 
   printf '\n' >> "$target"
-  cat "$AGENTS_SNIPPET" >> "$target"
+  cat "$snippet" >> "$target"
   printf '\n' >> "$target"
   printf 'updated: %s\n' "$target"
 }
 
 prepend_rules_snippet() {
   target=$1
+  snippet=$2
   tmp_file=$(mktemp "${TMPDIR:-/tmp}/karpathy-rules.XXXXXX")
   trap 'rm -f "$tmp_file"' EXIT HUP INT TERM
 
-  if grep -Fq "## Karpathy 准则 / Karpathy Guidelines" "$target"; then
+  if [ ! -f "$target" ]; then
+    cat "$snippet" > "$target"
+    printf '\n' >> "$target"
+    rm -f "$tmp_file"
+    trap - EXIT HUP INT TERM
+    printf 'updated: %s\n' "$target"
+    return
+  fi
+
+  if grep -Fq "## Karpathy Behavioral Guidelines" "$target"; then
     printf 'skip: %s already has common Karpathy rules\n' "$target"
     rm -f "$tmp_file"
     trap - EXIT HUP INT TERM
     return
   fi
 
-  cat "$RULES_SNIPPET" > "$tmp_file"
+  cat "$snippet" > "$tmp_file"
   printf '\n' >> "$tmp_file"
   cat "$target" >> "$tmp_file"
   mv "$tmp_file" "$target"
@@ -65,34 +91,27 @@ prepend_rules_snippet() {
   printf 'updated: %s\n' "$target"
 }
 
-[ $# -eq 1 ] || {
+[ $# -ge 1 ] && [ $# -le 2 ] || {
   usage >&2
   exit 1
 }
 
 project_path=$1
+manager_profile=${2:-jake}
 [ -d "$project_path" ] || fail "error: project path does not exist: $project_path"
 
 [ -f "$AGENTS_SNIPPET" ] || fail "error: missing template: $AGENTS_SNIPPET"
 [ -f "$RULES_SNIPPET" ] || fail "error: missing template: $RULES_SNIPPET"
 
+rendered_agents=$(mktemp "${TMPDIR:-/tmp}/karpathy-agents.XXXXXX")
+rendered_rules=$(mktemp "${TMPDIR:-/tmp}/karpathy-rules-rendered.XXXXXX")
+trap 'rm -f "$rendered_agents" "$rendered_rules"' EXIT HUP INT TERM
+render_template "$AGENTS_SNIPPET" "$rendered_agents" "$manager_profile"
+render_template "$RULES_SNIPPET" "$rendered_rules" "$manager_profile"
+
 agents_file=$project_path/AGENTS.md
 rules_file=$project_path/.agents/common/rules.md
+mkdir -p "$project_path/.agents/common"
 
-did_work=0
-
-if [ -f "$agents_file" ]; then
-  append_agents_snippet "$agents_file"
-  did_work=1
-else
-  printf 'skip: %s not found\n' "$agents_file"
-fi
-
-if [ -f "$rules_file" ]; then
-  prepend_rules_snippet "$rules_file"
-  did_work=1
-else
-  printf 'skip: %s not found\n' "$rules_file"
-fi
-
-[ "$did_work" -eq 1 ] || fail "error: no supported target files found under $project_path"
+append_agents_snippet "$agents_file" "$rendered_agents"
+prepend_rules_snippet "$rules_file" "$rendered_rules"
